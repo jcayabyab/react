@@ -1468,6 +1468,35 @@ const tests = {
         }
       `,
     },
+    {
+      code: normalizeIndent`
+        function MyComponent({ mapRef, ref, otherProp }) {
+          const foo = useCallback(() => {
+            console.log(mapRef.current, ref.current, otherProp);
+          }, [otherProp]);
+        }
+      `,
+      options: [
+        {
+          knownStableValues: '^.*Ref$|^ref$',
+        },
+      ],
+    },
+    {
+      code: normalizeIndent`
+        function MyComponent({ setValue, setValueReactive }) {
+          const foo = useCallback(() => {
+            setValue(42);
+            setValueReactive(42);
+          }, [setValueReactive]);
+        }
+      `,
+      options: [
+        {
+          knownStableValues: '^set(?!.*Reactive$).*$',
+        },
+      ],
+    },
   ],
   invalid: [
     {

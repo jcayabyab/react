@@ -32,8 +32,8 @@ export default {
           enableDangerousAutofixThisMayCauseInfiniteLoops: {
             type: 'boolean',
           },
-          knownStaticValues: {
-            type: 'array',
+          knownStableValues: {
+            type: 'string',
           },
         },
       },
@@ -54,9 +54,17 @@ export default {
         context.options[0].enableDangerousAutofixThisMayCauseInfiniteLoops) ||
       false;
 
+    const knownStableValues =
+      context.options &&
+      context.options[0] &&
+      context.options[0].knownStableValues
+        ? new RegExp(context.options[0].knownStableValues)
+        : undefined;
+
     const options = {
       additionalHooks,
       enableDangerousAutofixThisMayCauseInfiniteLoops,
+      knownStableValues: knownStableValues,
     };
 
     function reportProblem(problem) {
@@ -174,25 +182,6 @@ export default {
 
       const isArray = Array.isArray;
 
-      const knownStaticValues =
-        context.options &&
-        context.options[0] &&
-        context.options[0].knownStaticValues
-          ? context.options[0].knownStaticValues
-              .map(regex => {
-                try {
-                  return new RegExp(regex);
-                } catch (e) {
-                  context.report({
-                    node: node,
-                    message: `Invalid regex passed to knownStaticValues: ${regex}`,
-                  });
-                  return null;
-                }
-              })
-              .filter(regex => regex != null)
-          : [];
-
       // Next we'll define a few helpers that helps us
       // tell if some values don't have to be declared as deps.
 
@@ -209,11 +198,6 @@ export default {
       //       ^^^ true for this reference
       // False for everything else.
       function isStableKnownHookValue(resolved) {
-        for (const regex of knownStaticValues) {
-          if (regex.test(resolved.identifier.name)) {
-            return true;
-          }
-        }
         if (!isArray(resolved.defs)) {
           return false;
         }
@@ -513,7 +497,9 @@ export default {
             const resolved = reference.resolved;
             const isStable =
               memoizedIsStableKnownHookValue(resolved) ||
-              memoizedIsFunctionWithoutCapturedValues(resolved);
+              memoizedIsFunctionWithoutCapturedValues(resolved) ||
+              (options.knownStableValues &&
+                options.knownStableValues.test(resolved.identifiers[0].name));
             dependencies.set(dependency, {
               isStable,
               references: [reference],
