@@ -1,7 +1,7 @@
 {
   "name": "@jcayabyab/eslint-plugin-react-hooks",
   "description": "ESLint rules for React Hooks, modified by JCayabyab for better stable value handling",
-  "version": "5.0.0",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/jcayabyab/react.git",
