@@ -1,10 +1,10 @@
 {
-  "name": "eslint-plugin-react-hooks",
-  "description": "ESLint rules for React Hooks",
+  "name": "@jcayabyab/eslint-plugin-react-hooks",
+  "description": "ESLint rules for React Hooks, modified by JCayabyab for better stable value handling",
   "version": "5.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/facebook/react.git",
+    "url": "https://github.com/jcayabyab/react.git",
     "directory": "packages/eslint-plugin-react-hooks"
   },
   "files": [
@@ -21,7 +21,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/facebook/react/issues"
+    "url": "https://github.com/jcayabyab/react/issues"
   },
   "engines": {
     "node": ">=10"
