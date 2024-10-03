@@ -1,3 +1,81 @@
+# `jcayabyab/eslint-plugin-react-hooks`
+
+This ESLint plugin adds two additional options to the original `eslint-plugin-react-hooks`:
+1. `knownStableValues`: If commonly-used variables are known to be stable (e.g., `dispatch` from Redux), you can specify them as RegEx.
+2. `markStableValuesAsUnnecessary`: Stable values such as `set` functions returned from `React.setState` don't do anything when included in the dependency array, this allows you to enforce that they are not included in the dependency array.
+
+## knownStableValues
+
+Here is an example of how to use the `knownStableValues` option:
+
+```js
+{
+  "rules": {
+    "react-hooks/exhaustive-deps": ["warn", {
+      "knownStableValues": "(dispatch)"
+    }]
+  }
+}
+```
+
+Correct:
+
+```js
+import { useDispatch } from 'react-redux';
+
+import type { AppDispatch } from '../index';
+
+const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+
+function MyComponent() {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(someAction());
+  }, []); // The original rule would flag this as a warning with a missing dependency
+}
+```
+
+## markStableValuesAsUnnecessary
+
+Here is an example of how to use the `markStableValuesAsUnnecessary` option:
+
+```js
+{
+  "rules": {
+    "react-hooks/exhaustive-deps": ["warn", {
+      "markStableValuesAsUnnecessary": true
+    }]
+  }
+}
+```
+
+Correct:
+
+```js
+function MyComponent() {
+  const [foo, setFoo] = useState(0);
+
+  useEffect(() => {
+    setFoo(prev => prev + 1);
+  }, []);
+}
+```
+
+Incorrect:
+
+```js
+function MyComponent() {
+  const [foo, setFoo] = useState(0);
+
+  useEffect(() => {
+    setFoo(prev => prev + 1);
+  }, [setFoo]); // "React Hook useEffect has an unnecessary dependency: 'setFoo'. Either exclude it or remove the dependency array."
+}
+```
+
+Below is the original documentation.
+
 # `eslint-plugin-react-hooks`
 
 This ESLint plugin enforces the [Rules of Hooks](https://react.dev/reference/rules/rules-of-hooks).
