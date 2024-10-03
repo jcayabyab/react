@@ -32,6 +32,9 @@ export default {
           enableDangerousAutofixThisMayCauseInfiniteLoops: {
             type: 'boolean',
           },
+          knownStaticValues: {
+            type: 'array',
+          },
         },
       },
     ],
@@ -171,6 +174,25 @@ export default {
 
       const isArray = Array.isArray;
 
+      const knownStaticValues =
+        context.options &&
+        context.options[0] &&
+        context.options[0].knownStaticValues
+          ? context.options[0].knownStaticValues
+              .map(regex => {
+                try {
+                  return new RegExp(regex);
+                } catch (e) {
+                  context.report({
+                    node: node,
+                    message: `Invalid regex passed to knownStaticValues: ${regex}`,
+                  });
+                  return null;
+                }
+              })
+              .filter(regex => regex != null)
+          : [];
+
       // Next we'll define a few helpers that helps us
       // tell if some values don't have to be declared as deps.
 
@@ -187,6 +209,11 @@ export default {
       //       ^^^ true for this reference
       // False for everything else.
       function isStableKnownHookValue(resolved) {
+        for (const regex of knownStaticValues) {
+          if (regex.test(resolved.identifier.name)) {
+            return true;
+          }
+        }
         if (!isArray(resolved.defs)) {
           return false;
         }
