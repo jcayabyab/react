@@ -35,6 +35,9 @@ export default {
           knownStableValues: {
             type: 'string',
           },
+          markStableValuesAsUnnecessary: {
+            type: 'boolean',
+          },
         },
       },
     ],
@@ -61,10 +64,16 @@ export default {
         ? new RegExp(context.options[0].knownStableValues)
         : undefined;
 
+    const markStableValuesAsUnnecessary =
+      context.options &&
+      context.options[0] &&
+      context.options[0].markStableValuesAsUnnecessary;
+
     const options = {
       additionalHooks,
       enableDangerousAutofixThisMayCauseInfiniteLoops,
-      knownStableValues: knownStableValues,
+      knownStableValues,
+      markStableValuesAsUnnecessary,
     };
 
     function reportProblem(problem) {
@@ -631,6 +640,7 @@ export default {
             stableDependencies,
             externalDependencies: new Set(),
             isEffect: true,
+            options,
           });
           reportProblem({
             node: reactiveHook,
@@ -797,6 +807,7 @@ export default {
         stableDependencies,
         externalDependencies,
         isEffect,
+        options,
       });
 
       let suggestedDeps = suggestedDependencies;
@@ -897,6 +908,7 @@ export default {
           stableDependencies,
           externalDependencies,
           isEffect,
+          options,
         }).suggestedDependencies;
       }
 
@@ -1386,6 +1398,7 @@ function collectRecommendations({
   stableDependencies,
   externalDependencies,
   isEffect,
+  options,
 }) {
   // Our primary data structure.
   // It is a logical representation of property chains:
@@ -1497,8 +1510,10 @@ function collectRecommendations({
   const unnecessaryDependencies = new Set();
   const duplicateDependencies = new Set();
   declaredDependencies.forEach(({key}) => {
-    // Does this declared dep satisfy a real need?
-    if (satisfyingDependencies.has(key)) {
+    if (options.markStableValuesAsUnnecessary && stableDependencies.has(key)) {
+      unnecessaryDependencies.add(key);
+      // Does this declared dep satisfy a real need?
+    } else if (satisfyingDependencies.has(key)) {
       if (suggestedDependencies.indexOf(key) === -1) {
         // Good one.
         suggestedDependencies.push(key);
@@ -1506,23 +1521,21 @@ function collectRecommendations({
         // Duplicate.
         duplicateDependencies.add(key);
       }
-    } else {
-      if (
-        isEffect &&
-        !key.endsWith('.current') &&
-        !externalDependencies.has(key)
-      ) {
-        // Effects are allowed extra "unnecessary" deps.
-        // Such as resetting scroll when ID changes.
-        // Consider them legit.
-        // The exception is ref.current which is always wrong.
-        if (suggestedDependencies.indexOf(key) === -1) {
-          suggestedDependencies.push(key);
-        }
-      } else {
-        // It's definitely not needed.
-        unnecessaryDependencies.add(key);
+    } else if (
+      isEffect &&
+      !key.endsWith('.current') &&
+      !externalDependencies.has(key)
+    ) {
+      // Effects are allowed extra "unnecessary" deps.
+      // Such as resetting scroll when ID changes.
+      // Consider them legit.
+      // The exception is ref.current which is always wrong.
+      if (suggestedDependencies.indexOf(key) === -1) {
+        suggestedDependencies.push(key);
       }
+    } else {
+      // It's definitely not needed.
+      unnecessaryDependencies.add(key);
     }
   });
 

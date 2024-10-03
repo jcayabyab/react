@@ -1497,6 +1497,21 @@ const tests = {
         },
       ],
     },
+    {
+      code: normalizeIndent`
+        function MyComponent() {
+          const [foo, setFoo] = useState(0);
+          useEffect(() => {
+            setFoo(1);
+          }, []);
+        }
+      `,
+      options: [
+        {
+          markStableValuesAsUnnecessary: true,
+        },
+      ],
+    },
   ],
   invalid: [
     {
@@ -7696,6 +7711,75 @@ const tests = {
             "The 'foo' object makes the dependencies of useEffect Hook (at line 9) change on every render. " +
             "To fix this, wrap the initialization of 'foo' in its own useMemo() Hook.",
           suggestions: undefined,
+        },
+      ],
+    },
+    {
+      code: normalizeIndent`
+        function MyComponent() {
+          const [foo, setFoo] = useState(0);
+          useEffect(() => {
+            setFoo(1);
+          }, [setFoo]);
+        }
+      `,
+      options: [
+        {
+          markStableValuesAsUnnecessary: true,
+        },
+      ],
+      errors: [
+        {
+          message:
+            "React Hook useEffect has an unnecessary dependency: 'setFoo'. " +
+            'Either exclude it or remove the dependency array.',
+          suggestions: [
+            {
+              desc: 'Update the dependencies array to be: []',
+              output: normalizeIndent`
+                  function MyComponent() {
+                    const [foo, setFoo] = useState(0);
+                    useEffect(() => {
+                      setFoo(1);
+                    }, []);
+                  }
+                `,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      code: normalizeIndent`
+        function MyComponent({ ref }) {
+          useEffect(() => {
+            console.log(ref.current);
+          }, [ref]);
+        }
+      `,
+      options: [
+        {
+          markStableValuesAsUnnecessary: true,
+          knownStableValues: '^.*Ref$|^ref$',
+        },
+      ],
+      errors: [
+        {
+          message:
+            "React Hook useEffect has an unnecessary dependency: 'ref'. " +
+            'Either exclude it or remove the dependency array.',
+          suggestions: [
+            {
+              desc: 'Update the dependencies array to be: []',
+              output: normalizeIndent`
+                  function MyComponent({ ref }) {
+                    useEffect(() => {
+                      console.log(ref.current);
+                    }, []);
+                  }
+                `,
+            },
+          ],
         },
       ],
     },
