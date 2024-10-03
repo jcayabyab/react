@@ -12,7 +12,7 @@ Here is an example of how to use the `knownStableValues` option:
 {
   "rules": {
     "@jcayabyab/react-hooks/exhaustive-deps": ["warn", {
-      "knownStableValues": "(dispatch)"
+      "knownStableValues": "^(dispatch|createMixPanelTrackingCallback)$"
     }]
   }
 }
@@ -34,6 +34,17 @@ function MyComponent() {
     dispatch(someAction());
   }, []); // The original rule would flag this as a warning with a missing dependency
 }
+```
+
+```js
+const mixpanelTrackNewFolder = useCallback(
+  createMixPanelTrackingCallback('Folders.Create', {
+    component: 'FolderModal',
+    element: 'Button',
+    action: 'Click',
+  }),
+  []
+);
 ```
 
 ## markStableValuesAsUnnecessary

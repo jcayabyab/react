@@ -1354,6 +1354,21 @@ export default {
               break; // Unhandled
           }
           break; // Unhandled
+        case 'CallExpression':
+          if (
+            options.knownStableValues &&
+            options.knownStableValues.test(callback.callee.name)
+          ) {
+            return; // Handled
+          }
+          // useEffect(generateEffectBody(), []);
+          reportProblem({
+            node: reactiveHook,
+            message:
+              `React Hook ${reactiveHookName} received a function whose dependencies ` +
+              `are unknown. Pass an inline function instead.`,
+          });
+          return; // Handled
         default:
           // useEffect(generateEffectBody(), []);
           reportProblem({

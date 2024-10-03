@@ -1512,6 +1512,23 @@ const tests = {
         },
       ],
     },
+    {
+      code: normalizeIndent`
+        const mixpanelTrackNewFolder = useCallback(
+          createMixPanelTrackingCallback('Folders.Create', {
+            component: 'FolderModal',
+            element: 'Button',
+            action: 'Click',
+          }),
+          []
+        );
+      `,
+      options: [
+        {
+          knownStableValues: '^createMixPanelTrackingCallback$',
+        },
+      ],
+    },
   ],
   invalid: [
     {
