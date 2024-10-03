@@ -11,7 +11,7 @@ Here is an example of how to use the `knownStableValues` option:
 ```js
 {
   "rules": {
-    "react-hooks/exhaustive-deps": ["warn", {
+    "@jcayabyab/react-hooks/exhaustive-deps": ["warn", {
       "knownStableValues": "(dispatch)"
     }]
   }
@@ -43,7 +43,7 @@ Here is an example of how to use the `markStableValuesAsUnnecessary` option:
 ```js
 {
   "rules": {
-    "react-hooks/exhaustive-deps": ["warn", {
+    "@jcayabyab/react-hooks/exhaustive-deps": ["warn", {
       "markStableValuesAsUnnecessary": true
     }]
   }
