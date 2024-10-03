@@ -16,7 +16,7 @@ export default {
       description:
         'verifies the list of dependencies for Hooks like useEffect and similar',
       recommended: true,
-      url: 'https://github.com/facebook/react/issues/14920',
+      url: 'https://github.com/jcayabyab/react/blob/main/packages/eslint-plugin-react-hooks/README.md',
     },
     fixable: 'code',
     hasSuggestions: true,
