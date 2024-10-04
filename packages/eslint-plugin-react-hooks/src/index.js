@@ -15,7 +15,27 @@ export const configs = {
     plugins: ['react-hooks'],
     rules: {
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/exhaustive-deps': [
+        'warn',
+        {
+          knownStableValues: `^(${[
+            // `set` functions as stable unless they end in `Reactive`
+            'set(?!.*Reactive).*',
+
+            // Refs that are passed through a hook
+            'ref',
+            '.*Ref',
+          ].join('|')})$`,
+          markStableValuesAsUnnecessary: true,
+        },
+      ],
+    },
+  },
+  'recommended-original': {
+    plugins: ['@jcayabyab/react-hooks'],
+    rules: {
+      '@jcayabyab/react-hooks/rules-of-hooks': 'error',
+      '@jcayabyab/react-hooks/exhaustive-deps': 'warn',
     },
   },
 };
